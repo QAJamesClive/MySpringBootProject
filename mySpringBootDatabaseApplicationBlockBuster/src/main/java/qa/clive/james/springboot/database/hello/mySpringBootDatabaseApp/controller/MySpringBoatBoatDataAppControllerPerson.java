@@ -20,7 +20,7 @@ import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.reposito
 import qa.james.gareth.springboot.database.hello.mySpringBootDatabaseApp.exception.ResourceNotFoundException;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/person")
 public class MySpringBoatBoatDataAppControllerPerson {
 	
 	@Autowired

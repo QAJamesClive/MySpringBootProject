@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.data.annotation.CreatedDate;
-
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -31,7 +31,7 @@ public class MySpringBootDataModelRental {
 	private MySpringBootDataModelDVD dvdId;
 	
 	@NotNull
-	private int rentalDuration;
+	private boolean rentalReturned;
 	
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "personId", nullable = false)
@@ -43,6 +43,12 @@ public class MySpringBootDataModelRental {
 	@Temporal(TemporalType.TIMESTAMP)
 	@CreatedDate
 	private Date rentedDate;
+	
+	@Column(nullable = false)
+	@Temporal(TemporalType.TIMESTAMP)
+	@LastModifiedDate
+	private Date lastModified;
+	
 
 	public MySpringBootDataModelPerson getPersonId() {
 		return personId;
@@ -77,12 +83,12 @@ public class MySpringBootDataModelRental {
 		this.rentedDate = rentedDate;
 	}
 
-	public int getRentalDuration() {
-		return rentalDuration;
+	public boolean getRrentalReturned() {
+		return rentalReturned;
 	}
 
-	public void setRentalDuration(int rentalDuration) {
-		this.rentalDuration = rentalDuration;
+	public void setrentalReturned(boolean rentalReturned) {
+		this.rentalReturned = rentalReturned;
 	}
 	
 }

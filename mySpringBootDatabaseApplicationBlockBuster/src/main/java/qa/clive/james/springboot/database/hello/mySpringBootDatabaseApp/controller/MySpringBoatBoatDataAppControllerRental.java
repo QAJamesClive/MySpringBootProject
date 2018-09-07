@@ -16,13 +16,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.model.MySpringBootDataModelDVD;
+import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.model.MySpringBootDataModelPerson;
 import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.model.MySpringBootDataModelRental;
+import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.repository.MySpringBootRepositoryDVD;
 import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.repository.MySpringBootRepositoryPerson;
 import qa.clive.james.springboot.database.hello.mySpringBootDatabaseApp.repository.MySpringBootRepositoryRental;
 import qa.james.gareth.springboot.database.hello.mySpringBootDatabaseApp.exception.ResourceNotFoundException;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/rental")
 public class MySpringBoatBoatDataAppControllerRental {
 	
 	@Autowired
@@ -30,44 +32,42 @@ public class MySpringBoatBoatDataAppControllerRental {
 	
 	@Autowired
 	private MySpringBootRepositoryPerson repositoryPerson;
+	
+	@Autowired
+	private MySpringBootRepositoryDVD repositoryDvd;
 	 
 	
-	@PostMapping("/person/{personId}/rental")	
+	@PostMapping("/person/{personId}/dvd/{dvdId}")	
 	public MySpringBootDataModelRental creatComment(@PathVariable (value = "personId") Long personId,
+													@PathVariable (value = "dvdId") Long dvdId,
 													@Valid @RequestBody MySpringBootDataModelRental rental) {
-		
-		return repositoryPerson.findById(personId).map(mySpringBootDataModelPerson -> {
-			rental.setPersonId(mySpringBootDataModelPerson);
-			return repositoryRental.save(rental);
-		}).orElseThrow(() -> new ResourceNotFoundException("Person","id",rental));
+		MySpringBootDataModelPerson person = repositoryPerson.findById(personId).orElseThrow(()-> new ResourceNotFoundException("Person","id",personId));
+		MySpringBootDataModelDVD dvd = repositoryDvd.findById(dvdId).orElseThrow(()-> new ResourceNotFoundException("DVD","id",dvdId));
+		rental.setDvdId(dvd);
+		rental.setPersonId(person);
+		rental.setrentalReturned(false);
+		return repositoryRental.save(rental);
+
 	}
 	
 
-	@PutMapping("/person/{personId}}/rental/{rentalId}")
-	public MySpringBootDataModelRental updateOrder(@PathVariable (value = "personId") Long personId,
-												   @PathVariable (value = "rentalId") Long rentalId, 
-												   @Valid @RequestBody MySpringBootDataModelRental rentalDetails) {
-		if(!repositoryPerson.existsById(personId)) {
-			throw new ResourceNotFoundException("Person","id",rentalDetails);
-		}
-		return repositoryRental.findById(rentalId).map(rental -> {
-			rental.setRentalDuration(rentalDetails.getRentalDuration());
-			return repositoryRental.save(rental);
-		}).orElseThrow(() -> new ResourceNotFoundException("Rental Id", "id", rentalDetails));
+	@PutMapping("/rental/{rentalId}/dvd/{dvdId}")
+	public MySpringBootDataModelRental updateOrder(@PathVariable (value = "rentalId") Long rentalId,
+												   @PathVariable (value = "dvdId") Long dvdId,
+												   @Valid @RequestBody MySpringBootDataModelRental rental) {
+		MySpringBootDataModelDVD dvd = repositoryDvd.findById(dvdId).orElseThrow(()-> new ResourceNotFoundException("DVD","id",dvdId));
+		rental.setDvdId(dvd);
+		return repositoryRental.save(rental);
 	}
 	
-	@DeleteMapping("/person/{personID}/rental/{rentalId}")
-	public ResponseEntity<?> deleteComment(@PathVariable (value = "personId") Long personId, @PathVariable (value = "rentalId") Long rentalId){
-		if(!repositoryPerson.existsById(personId)) {
-			throw new ResourceNotFoundException("Person","id",personId);
+	@PutMapping("/returned/{rentalId}/dvd/{dvdId}")
+	public MySpringBootDataModelRental returnOrder(@PathVariable (value = "rentalId") Long rentalId,
+												   @PathVariable (value = "dvdId") Long dvdId,
+												   @Valid @RequestBody MySpringBootDataModelRental rental) {
+		if(!rental.getRrentalReturned()) {
+			rental.setrentalReturned(true);
 		}
-		return repositoryRental.findById(rentalId).map(rental -> {
-			repositoryRental.delete(rental);
-			return ResponseEntity.ok().build();
-		}).orElseThrow(() -> new ResourceNotFoundException("Rental Id", rentalId.toString(), null));
+		return repositoryRental.save(rental);
 	}
-	
-	
-	
 	
 }
